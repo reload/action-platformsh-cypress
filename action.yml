@@ -85,7 +85,7 @@ runs:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
           cypress test failed :scream:
-          [see failing screenshots and summary here](https://github.com/reload/bupl/actions/runs/${{ github.run_id }}#artifacts)
+          [see failing screenshots and summary here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts)
           ..or run the tests locally using `make regression-interface` or `make regression-run`
         edit-mode: replace
 
@@ -96,5 +96,5 @@ runs:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
           cypress test approved :sunglasses:
-          [see summary here](https://github.com/reload/bupl/actions/runs/${{ github.run_id }}#artifacts)
+          [see summary here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts)
         edit-mode: replace
