@@ -1,0 +1,100 @@
+name: 'Platform.sh Cypress test suite'
+description: 'Run Cypress test specs against platformSH site'
+branding:
+  icon: 'crosshair'
+  color: 'green'
+
+inputs:
+  PLATFORMSH_KEY:
+    description: "API key for connecting to Platform.sh"
+    required: true
+    type: string
+
+  PLATFORMSH_ID:
+    description: "ID for the Platform.sh project."
+    required: true
+    type: string
+
+  ENVIRONMENT_NAME:
+    description: "Which environment to check against - defaults to pr-NUMBER"
+    default: "pr-${{ github.event.pull_request.number }}"
+    required: false
+    type: string
+
+  ALLOW_CANCEL_CRON:
+    description: "Can we cancel on-going crons, to speed up deployment? default: 1"
+    default: 1
+    required: false
+    type: integer
+
+runs:
+  using: "composite"
+  steps:
+    - uses: peter-evans/find-comment@v2
+      id: fc
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: cypress test
+
+    - uses: peter-evans/create-or-update-comment@v2
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          cypress test results go here
+        edit-mode: replace
+
+    - uses: reload/action-platformsh-url@main
+      id: platformsh_url
+      with:
+        PLATFORMSH_ID: ${{ inputs.PLATFORMSH_ID }}
+        PLATFORMSH_KEY: ${{ inputs.PLATFORMSH_KEY }}
+        ENVIRONMENT_NAME: ${{ inputs.ENVIRONMENT_NAME }}
+        ALLOW_CANCEL_CRON: ${{ inputs.ALLOW_CANCEL_CRON }}
+
+    - uses: actions/checkout@v3
+
+    - name: Cypress tests
+      uses: cypress-io/github-action@v5
+      with:
+        wait-on: ${{ steps.platformsh_url.outputs.url }}
+        config: video=false
+      env:
+        CYPRESS_BASE_URL: ${{ steps.platformsh_url.outputs.url }}
+
+    - uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: cypress-screenshots
+        path: cypress/screenshots
+        if-no-files-found: ignore
+
+    - uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: cypress-videos
+        path: cypress/videos
+        if-no-files-found: ignore
+
+    - name: Create or update comment
+      if: failure()
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          cypress test failed :scream:
+          [see failing screenshots and summary here](https://github.com/reload/bupl/actions/runs/${{ github.run_id }}#artifacts)
+          ..or run the tests locally using `make regression-interface` or `make regression-run`
+        edit-mode: replace
+
+    - name: Create or update comment
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          cypress test approved :sunglasses:
+          [see summary here](https://github.com/reload/bupl/actions/runs/${{ github.run_id }}#artifacts)
+        edit-mode: replace
