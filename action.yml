@@ -24,6 +24,7 @@ inputs:
   WORKING_DIRECTORY:
     description: "The directory that contains package.json (default: ./)"
     default: "./"
+    required: false
     type: string
 
   ALLOW_CANCEL_CRON:
