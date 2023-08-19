@@ -21,6 +21,11 @@ inputs:
     required: false
     type: string
 
+  WORKING_DIRECTORY:
+    description: "The directory that contains package.json (default: ./)"
+    default: "./"
+    type: string
+
   ALLOW_CANCEL_CRON:
     description: "Can we cancel on-going crons, to speed up deployment? default: 1"
     default: 1
@@ -60,6 +65,7 @@ runs:
       with:
         wait-on: ${{ steps.platformsh_url.outputs.url }}
         config: video=false
+        working-directory: ${{ inputs.WORKING_DIRECTORY }}
       env:
         CYPRESS_BASE_URL: ${{ steps.platformsh_url.outputs.url }}
 
@@ -67,14 +73,14 @@ runs:
       if: failure()
       with:
         name: cypress-screenshots
-        path: cypress/screenshots
+        path: ${{ inputs.WORKING_DIRECTORY }}/cypress/screenshots
         if-no-files-found: ignore
 
     - uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: cypress-videos
-        path: cypress/videos
+        path: ${{ inputs.WORKING_DIRECTORY }}/cypress/videos
         if-no-files-found: ignore
 
     - uses: peter-evans/find-comment@v2
