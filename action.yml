@@ -30,21 +30,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: peter-evans/find-comment@v2
-      id: fc
-      with:
-        issue-number: ${{ github.event.pull_request.number }}
-        comment-author: 'github-actions[bot]'
-        body-includes: cypress test
-
-    - uses: peter-evans/create-or-update-comment@v2
-      with:
-        comment-id: ${{ steps.fc.outputs.comment-id }}
-        issue-number: ${{ github.event.pull_request.number }}
-        body: |
-          cypress test results go here
-        edit-mode: replace
-
     - uses: reload/action-platformsh-url@main
       id: platformsh_url
       with:
@@ -76,32 +61,3 @@ runs:
         name: cypress-videos
         path: cypress/videos
         if-no-files-found: ignore
-
-    - uses: peter-evans/find-comment@v2
-      id: fc_update
-      with:
-        issue-number: ${{ github.event.pull_request.number }}
-        comment-author: 'github-actions[bot]'
-        body-includes: cypress test
-
-    - name: Create or update comment
-      if: failure()
-      uses: peter-evans/create-or-update-comment@v2
-      with:
-        comment-id: ${{ steps.fc_update.outputs.comment-id }}
-        issue-number: ${{ github.event.pull_request.number }}
-        body: |
-          cypress test failed :scream:
-          [see failing screenshots and summary here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts)
-          ..or run the tests locally using `make regression-interface` or `make regression-run`
-        edit-mode: replace
-
-    - name: Create or update comment
-      uses: peter-evans/create-or-update-comment@v2
-      with:
-        comment-id: ${{ steps.fc_update.outputs.comment-id }}
-        issue-number: ${{ github.event.pull_request.number }}
-        body: |
-          cypress test approved :sunglasses:
-          [see summary here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts)
-        edit-mode: replace
