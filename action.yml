@@ -33,6 +33,24 @@ inputs:
     required: false
     type: integer
 
+  FAILED_IMAGE_UPLOAD:
+    description: "Should failing tests upload fail images to the Action artifacts?  default: 0"
+    default: 0
+    required: false
+    type: integer
+
+  FAILED_VIDEO_UPLOAD:
+    description: "Should failing tests upload fail videos to the Action artifacts?  default: 0"
+    default: 0
+    required: false
+    type: integer
+
+  TARGET_CYPRESS_SPECS:
+    description: "Specific Cypress specs to run. default: '*/**' (all available)"
+    default: '*/**'
+    required: false
+    type: string
+
 runs:
   using: "composite"
   steps:
@@ -52,18 +70,19 @@ runs:
         wait-on: ${{ steps.platformsh_url.outputs.url }}
         config: video=false
         working-directory: ${{ inputs.WORKING_DIRECTORY }}
+        spec: ${{ inputs.TARGET_CYPRESS_SPECS }}
       env:
         CYPRESS_BASE_URL: ${{ steps.platformsh_url.outputs.url }}
 
     - uses: actions/upload-artifact@v3
-      if: failure()
+      if: ${{ failure() && inputs.FAILED_IMAGE_UPLOAD == 1 }}
       with:
         name: cypress-screenshots
         path: ${{ inputs.WORKING_DIRECTORY }}/cypress/screenshots
         if-no-files-found: ignore
 
     - uses: actions/upload-artifact@v3
-      if: failure()
+      if: ${{ failure() && inputs.FAILED_VIDEO_UPLOAD == 1 }}
       with:
         name: cypress-videos
         path: ${{ inputs.WORKING_DIRECTORY }}/cypress/videos
