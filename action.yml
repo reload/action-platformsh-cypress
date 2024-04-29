@@ -65,7 +65,7 @@ runs:
     - uses: actions/checkout@v3
 
     - name: Cypress tests
-      uses: cypress-io/github-action@v5
+      uses: cypress-io/github-action@v6
       with:
         wait-on: ${{ steps.platformsh_url.outputs.url }}
         config: video=false
@@ -74,14 +74,14 @@ runs:
       env:
         CYPRESS_BASE_URL: ${{ steps.platformsh_url.outputs.url }}
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: ${{ failure() && inputs.FAILED_IMAGE_UPLOAD == 1 }}
       with:
         name: cypress-screenshots
         path: ${{ inputs.WORKING_DIRECTORY }}/cypress/screenshots
         if-no-files-found: ignore
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: ${{ failure() && inputs.FAILED_VIDEO_UPLOAD == 1 }}
       with:
         name: cypress-videos
