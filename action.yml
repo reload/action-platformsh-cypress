@@ -1,8 +1,8 @@
-name: 'Platform.sh Cypress test suite'
-description: 'Run Cypress test specs against platformSH site'
+name: "Platform.sh Cypress test suite"
+description: "Run Cypress test specs against platformSH site"
 branding:
-  icon: 'crosshair'
-  color: 'green'
+  icon: "crosshair"
+  color: "green"
 
 inputs:
   PLATFORMSH_KEY:
@@ -47,7 +47,7 @@ inputs:
 
   TARGET_CYPRESS_SPECS:
     description: "Specific Cypress specs to run. default: '*/**' (all available)"
-    default: '*/**'
+    default: "*/**"
     required: false
     type: string
 
@@ -74,14 +74,14 @@ runs:
       env:
         CYPRESS_BASE_URL: ${{ steps.platformsh_url.outputs.url }}
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: ${{ failure() && inputs.FAILED_IMAGE_UPLOAD == 1 }}
       with:
         name: cypress-screenshots
         path: ${{ inputs.WORKING_DIRECTORY }}/cypress/screenshots
         if-no-files-found: ignore
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: ${{ failure() && inputs.FAILED_VIDEO_UPLOAD == 1 }}
       with:
         name: cypress-videos
